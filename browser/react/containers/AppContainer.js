@@ -23,6 +23,7 @@ export default class AppContainer extends Component {
     this.prev = this.prev.bind(this);
     this.selectAlbum = this.selectAlbum.bind(this);
     this.deselectAlbum = this.deselectAlbum.bind(this);
+    this.getArtistsAlbumsAndSongs = this.getArtistsAlbumsAndSongs.bind(this);
   }
 
   componentDidMount () {
@@ -34,6 +35,16 @@ export default class AppContainer extends Component {
       this.next());
     AUDIO.addEventListener('timeupdate', () =>
       this.setProgress(AUDIO.currentTime / AUDIO.duration));
+
+    axios.get('/api/artists')
+      .then((res) => {
+        return res.data;
+      })
+      .then((allArtists) => {
+        this.setState({
+          artists: allArtists
+        });
+      });
   }
 
   onLoad (albums) {
@@ -102,6 +113,34 @@ export default class AppContainer extends Component {
     this.setState({ selectedAlbum: {}});
   }
 
+  getArtistsAlbumsAndSongs (routeParam) {
+
+    axios.get(`/api/artists/${routeParam}`)
+      .then(res => res.data)
+      .then((artist) => {
+        this.setState({
+          selectedArtist: artist
+        });
+      });
+
+    axios.get(`/api/artists/${routeParam}/albums`)
+      .then(res => res.data)
+      .then((artistsAlbums) => {
+        convertAlbums(artistsAlbums);
+        this.setState({
+          albums: artistsAlbums
+        });
+      });
+
+    axios.get(`/api/artists/${routeParam}/songs`)
+      .then(res => res.data)
+      .then((artistsSongs) => {
+        this.setState({
+          currentSongList: artistsSongs
+        });
+      });
+  }
+
   render () {
     return (
       <div id="main" className="container-fluid">
@@ -116,7 +155,12 @@ export default class AppContainer extends Component {
             album: this.state.selectedAlbum,
             currentSong: this.state.currentSong,
             isPlaying: this.state.isPlaying,
-            toggleOne: this.toggleOne
+            toggleOne: this.toggleOne,
+            artists: this.state.artists,
+            currentSongList: this.state.currentSongList,
+            selectedArtist: this.state.selectedArtist,
+            getArtistsAlbumsAndSongs: this.getArtistsAlbumsAndSongs
+
           })
           : null
         }
