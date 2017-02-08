@@ -37,6 +37,6 @@ const Songs = (props) => {
       </tbody>
     </table>
   );
-}
+};
 
 export default Songs;
